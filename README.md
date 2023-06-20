@@ -9,9 +9,10 @@
 - 가볍게 일상을 적으며 친구들과 공유할 수 있는 꾹꾹을 개발
 
 ## 기술 스택
-Spring Framework
-Vue3
-AWS
+<img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=spring&logoColor=white"/>
+<img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat&logo=vue.js&logoColor=white"/>
+<img src="https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=vue.js&logoColor=white"/>
+
 젠킨스
 MySQL
 
