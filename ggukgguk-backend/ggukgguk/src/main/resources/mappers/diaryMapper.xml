@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Diary">
+  
+  	<resultMap id="DiaryMonthResultSet" type="DiaryMonth">
+	    <id property="diaryId" column="diary_id" />
+	    <result property="memberId" column="member_id" />
+	    <result property="diaryYear" column="diary_year" />
+	    <result property="diaryMonth" column="diary_month" />
+	    <result property="mainColor" column="main_color" />
+	    <result property="mainKeyword" column="main_keyword" />
+	    <collection property="diaryKeywordList" ofType="DiaryKeyword">
+	        <id property="diaryKeywordId" column="diary_keyword_id" />
+	        <result property="diaryId" column="diary_id" />
+	        <result property="diaryKeyword" column="diary_keyword" />
+	        <result property="diaryFreq" column="diary_freq" />
+	    </collection>
+	    <collection property="diaryRecordList" ofType="DiaryRecord">
+	        <result property="recordDay" column="record_day" />
+	        <result property="recordCount" column="record_count" />
+	    </collection>
+	</resultMap>
+  
+  <select id="selectList" parameterType="DiarySearch" resultType="Diary">
+       <![CDATA[   
+        SELECT *
+		FROM diary
+		WHERE diary.member_id=#{memberId} AND diary.diary_year=#{diaryYear}
+      ]]>
+   </select>
+
+  <select id="selectOne" parameterType="DiarySearch" resultMap="DiaryMonthResultSet">
+       <![CDATA[   
+        SELECT d.*, k.*, DAY(r.record_created_at) AS record_day, COUNT(*) AS record_count
+		FROM diary AS d
+		JOIN record AS r ON d.member_id = r.member_id
+        AND d.diary_year = YEAR(r.record_created_at)
+        AND d.diary_month = MONTH(r.record_created_at)
+        INNER JOIN diary_keyword AS k ON d.diary_id=k.diary_id
+		WHERE d.member_id=#{memberId} AND d.diary_year=#{diaryYear} AND d.diary_month=#{diaryMonth}
+		GROUP BY k.diary_keyword_id, DAY(r.record_created_at)
+      ]]>
+   </select>
+   
+   <select id="selectColorList" parameterType="Integer" resultType="String">
+       <![CDATA[   
+        SELECT diary_color.diary_color
+		FROM diary_color
+		WHERE diary_color.diary_id=#{diaryId}
+      ]]>
+   </select>
+   
+   	<update id="update" parameterType="Diary">
+       <![CDATA[   
+         UPDATE diary
+         SET main_color=#{mainColor}
+         WHERE diary_id=#{diaryId}
+      ]]>
+   </update>
+  	<select id="selectdiaryNotify" parameterType="Integer" resultType="Diary">
+       <![CDATA[   
+        SELECT *
+		FROM diary
+		WHERE diary_id=#{referenceId}
+      ]]>
+   </select>
+</mapper>

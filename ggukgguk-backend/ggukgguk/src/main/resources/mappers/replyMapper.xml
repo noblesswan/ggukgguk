@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Reply">
+   
+
+   <insert id="insert" parameterType="Reply">
+       <![CDATA[   
+		 INSERT INTO reply(reply_content, reply_date, record_id, member_id)
+         VALUES(#{replyContent}, NOW(), #{recordId}, #{memberId})
+ 		]]>
+ 		<selectKey resultType="int" keyProperty="replyId" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+   </insert>
+  
+  <select id="selectList" parameterType="Integer" resultType="replyNickname">
+       <![CDATA[   
+        SELECT reply.*, member.member_nickname, member.member_id as replyMemberId
+		FROM reply
+		JOIN member
+		ON reply.member_id=member.member_id
+		WHERE reply.record_id=#{recordId}
+      ]]>
+   </select>
+  
+	<update id="update" parameterType="Reply">
+       <![CDATA[   
+         UPDATE reply
+         SET reply_content=#{replyContent}, reply_date=NOW()
+         WHERE reply_id=#{replyId}
+      ]]>
+   </update>
+   
+   <delete id="delete" parameterType="Integer">
+       <![CDATA[   
+         DELETE FROM reply
+         WHERE reply_id=#{replyId}
+      ]]>
+   </delete>
+</mapper>

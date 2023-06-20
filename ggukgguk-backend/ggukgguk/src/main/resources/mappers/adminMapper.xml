@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Admin">
+	<resultMap id="mediaFileExtended" type="MediaFileForAdmin">
+		<id property="mediaFileId" column="media_file_id"></id>
+		<result property="mediaTypeId" column="media_type_id"></result>
+		<result property="mediaFileBlocked" column="media_file_blocked"></result>
+		<result property="mediaFileChecked" column="media_file_checked"></result>
+		<collection property="mediaFileBlockedHistory" ofType="mediaFileBlockedHistory">
+			<id property="mediaFileBlockedHistoryId" column="media_file_blocked_history_id"></id>
+			<result property="mediaFileId" column="media_file_id"/>
+			<result property="mediaFileDetectedLabel" column="media_file_detected_label"/>
+			<result property="mediaFileDetectedWeights" column="media_file_detected_weights"/>
+			<result property="mediaFileCheckedAt" column="media_file_checked_at"/>
+		</collection>
+	</resultMap>
+
+	<!-- 공지사항 관련 mapper -->
+	<select id="noticeSelect" parameterType="int" resultType="int">
+		SELECT
+		notice_id, notice_title, notice_content, notice_created_at,
+		notice_is_emergency
+		FROM notice
+		WHERE notice_id = #{noticeId}
+	</select>
+
+	<insert id="noticeInsert" parameterType="Notice">
+		INSERT INTO notice
+		(notice_title, notice_content)
+		VALUES
+		(#{noticeTitle}, #{noticeContent})
+	</insert>
+
+	<update id="noticeUpdate" parameterType="Notice">
+		UPDATE notice
+		SET
+		notice_title= #{noticeTitle},
+		notice_content = #{noticeContent}
+		WHERE
+		notice_id =#{noticeId}
+	</update>
+
+	<delete id="noticeDelete">
+		DELETE FROM notice
+		WHERE notice_id = #{noticeId}
+	</delete>
+
+	<select id="noticeSelectList" resultType="Notice">
+		SELECT notice_id,
+		notice_title, notice_content, notice_created_at
+		FROM notice
+		ORDER BY
+		notice_created_at DESC
+	</select>
+
+	<select id="noticeSelectPage" parameterType="PageOption"
+		resultType="Notice">
+		SELECT
+		notice_id, notice_title, notice_content,
+		notice_created_at
+		FROM notice
+		ORDER BY notice_created_at DESC
+		LIMIT
+		#{skip}, #{size}
+	</select>
+
+	<!-- 컨텐츠관리 관련 mapper -->
+	<select id="contentSelectList" parameterType="PageOption"
+		resultType="Content">
+		SELECT record_id, member_id, record_created_at,
+		r.media_file_id, media_type_id, media_file_blocked, media_file_checked
+		FROM record r
+		LEFT JOIN
+		media_file m
+		ON r.media_file_id = m.media_file_id
+		ORDER BY
+		record_created_at DESC
+		LIMIT #{skip}, #{size};
+	</select>
+	<!-- 페이징 처리를 하기 위한 전체 게시글 수 -->
+	<select id="selectContentTotal" parameterType="PageOption"
+		resultType="int">
+		<![CDATA[   
+			SELECT COUNT(*) FROM record
+		]]>
+	</select>
+
+	<!-- 차단 미디어 재심사 요청 조회 -->
+	<select id="selectMediaClaim" parameterType="MediaClaimPageOption"
+		resultType="MediaFileRecheckRequest">
+		SELECT mfr.media_file_recheck_request_id, mfr.media_file_id, mfr.media_file_recheck_request_claim,
+			mfr.media_file_recheck_request_reply, mfr.media_file_recheck_request_status,
+			mfr.media_file_recheck_request_created_at,
+			mr.member_id, mr.member_name, mr.member_email, mr.member_phone,
+			(SELECT media_type_id FROM media_file mf WHERE mf.media_file_id = mfr.media_file_id) as media_type_id
+		FROM media_file_recheck_request mfr
+		LEFT JOIN (
+			SELECT m.member_id, m.member_name, m.member_email, m.member_phone, r.media_file_id 
+			FROM record r  
+			LEFT JOIN `member` m 
+			ON r.member_id = m.member_id
+		) mr
+		ON mfr.media_file_id = mr.media_file_id
+		<where>
+			<if test="mediaFileRecheckRequestStatus != null">
+				AND mfr.media_file_recheck_request_status = #{mediaFileRecheckRequestStatus}
+			</if>
+			<if test="mediaFileId != null">
+				AND mfr.media_file_id = #{mediaFileId}
+			</if>
+		</where>
+		ORDER BY media_file_recheck_request_id DESC
+		LIMIT #{skip}, #{size};
+	</select>
+	<!-- 페이징 처리를 하기 위한 전체 게시글 수 -->
+	<select id="selectMediaClaimTotal" parameterType="MediaClaimPageOption"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM media_file_recheck_request mfr
+		<where>
+			<if test="mediaFileRecheckRequestStatus != null">
+				AND mfr.media_file_recheck_request_status = #{mediaFileRecheckRequestStatus}
+			</if>
+			<if test="mediaFileId != null">
+				AND mfr.media_file_id = #{mediaFileId}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 차단 미디어 재심사 요청 작성 -->
+	<insert id="insertMediaClaim" parameterType="MediaFileRecheckRequest">
+		INSERT INTO media_file_recheck_request 
+		(media_file_id, media_file_recheck_request_claim, media_file_recheck_request_status)
+		VALUES (#{mediaFileId}, #{mediaFileRecheckRequestClaim}, #{mediaFileRecheckRequestStatus})
+	</insert>
+	
+	<!-- 차단 미디어 재심사 요청 수정 -->
+	<update id="updateMediaClaim" parameterType="MediaFileRecheckRequest">
+		UPDATE media_file_recheck_request
+		<set>
+			<if test="mediaFileRecheckRequestClaim != null">
+			    media_file_recheck_request_claim = #{mediaFileRecheckRequestClaim},
+			</if>
+			<if test="mediaFileRecheckRequestReply != null">
+			    media_file_recheck_request_reply = #{mediaFileRecheckRequestReply},
+			</if>
+			<if test="mediaFileRecheckRequestStatus != null">
+			    media_file_recheck_request_status = #{mediaFileRecheckRequestStatus},
+			</if>
+		</set>
+	  		WHERE
+	        media_file_recheck_request_id = #{mediaFileRecheckRequestId}
+	</update>
+	
+	<!-- 미디어 메타데이터 + 미디어 차단 이력 조회 -->
+	<select id="selectMediaExtended" parameterType="MediaFileForAdmin"
+		resultMap="mediaFileExtended">
+		SELECT *
+		FROM media_file mf
+		LEFT JOIN media_file_blocked_history mfh
+		ON mf.media_file_id = mfh.media_file_id
+		WHERE mf.media_file_id = #{mediaFileId}
+	</select>
+	
+	<!-- 미디어 차단 여부 수정 -->
+	<update id="updateMediaFile" parameterType="MediaFileForAdmin">
+		UPDATE media_file
+		SET media_file_blocked = #{mediaFileBlocked}
+  		WHERE
+        media_file_id = #{mediaFileId}
+	</update>
+
+	<!-- 회원관리 관련 mapper -->
+	<select id="memberSelectList" parameterType="PageOption"
+		resultType="MemberAdmin">
+		SELECT member_id, member_name, member_email, member_phone, member_birth, member_authority
+		FROM member
+		ORDER BY member_id DESC
+		LIMIT #{skip}, #{size}
+	</select>
+	<update id="memberDelete" parameterType="java.lang.String">
+		UPDATE member
+		SET
+		member_pw = '',
+		member_name = '',
+		member_nickname = '',
+		member_email =
+		NULL,
+		member_phone = '',
+		member_activated = 0
+		WHERE member_id = #{memberId};
+	</update>
+
+	<!-- 관리자 메인 페이지 통계 -->
+	<select id="totalMemberSelect" resultType="int">
+		SELECT COUNT(*) AS
+		member_count FROM member;
+	</select>
+
+	<select id="todayMemberSelect" resultType="int">
+		<![CDATA[
+			SELECT COUNT(*) AS num_members FROM member
+			WHERE member_created_at >= CONCAT(CURDATE(), ' 00:00:00') AND member_created_at <= CONCAT(CURDATE(), ' ', TIME(NOW()));
+		]]>
+	</select>
+	<select id="totalContentSelect" resultType="int">
+		SELECT
+		COUNT(record_id) AS total_content FROM record
+	</select>
+
+	<select id="todayContentSelect" resultType="int">
+		SELECT
+		COUNT(record_id) as today_content FROM record
+		WHERE
+		DATE(record_created_at) = CURDATE();
+	</select>
+
+	<select id="recordSelectList" parameterType="int"
+		resultType="ContentDetail">
+		SELECT record.record_id, member.member_id,
+		record.record_comment, record.record_created_at,
+		record.media_file_id,
+		record.record_is_open, record.record_share_to,
+		reply.reply_id,
+		reply.member_id AS reply_member_id, reply.reply_content,
+		reply.reply_date
+		FROM record
+		LEFT JOIN reply ON record.record_id =
+		reply.record_id
+		LEFT JOIN member ON reply.member_id = member.member_id
+		WHERE record.record_id = #{recordId}
+		ORDER BY record.record_created_at
+		DESC, reply.reply_date;
+	</select>
+
+	<select id="selectRecentBatchJobExecution"
+		parameterType="String" resultType="BatchJobExecution">
+		SELECT JOB_EXECUTION_ID, VERSION,
+			JOB_INSTANCE_ID, CREATE_TIME,
+			START_TIME, END_TIME, STATUS, EXIT_CODE,
+			EXIT_MESSAGE, LAST_UPDATED, JOB_CONFIGURATION_LOCATION
+		FROM BATCH_JOB_EXECUTION
+		WHERE JOB_INSTANCE_ID = (
+			SELECT JOB_INSTANCE_ID AS jid
+			FROM BATCH_JOB_INSTANCE
+			WHERE JOB_NAME = #{jobName}
+			ORDER BY JOB_INSTANCE_ID DESC
+			LIMIT 1
+		)
+		ORDER BY JOB_EXECUTION_ID DESC;
+	</select>
+
+	<select id="selectBatchJobExecution"
+		parameterType="BatchPageOption" resultType="BatchJobExecution">
+		SELECT bji.JOB_NAME,
+		bje.JOB_EXECUTION_ID, bje.VERSION, bje.JOB_INSTANCE_ID,
+		bje.CREATE_TIME,
+		bje.START_TIME, bje.END_TIME, bje.STATUS,
+		bje.EXIT_CODE,
+		bje.EXIT_MESSAGE, bje.LAST_UPDATED,
+		bje.JOB_CONFIGURATION_LOCATION
+		FROM
+		BATCH_JOB_EXECUTION bje
+		LEFT JOIN
+		BATCH_JOB_INSTANCE bji
+		ON bje.JOB_INSTANCE_ID = bji.JOB_INSTANCE_ID
+		WHERE bji.JOB_NAME =
+		#{jobName}
+		ORDER BY bje.JOB_EXECUTION_ID DESC
+		LIMIT
+		#{skip}, #{size};
+	</select>
+
+	<select id="selectBatchJobExecutionCount"
+		parameterType="BatchPageOption" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		BATCH_JOB_EXECUTION bje
+		LEFT JOIN
+		BATCH_JOB_INSTANCE bji
+		ON bje.JOB_INSTANCE_ID = bji.JOB_INSTANCE_ID
+		WHERE bji.JOB_NAME =
+		#{jobName};
+	</select>
+	
+	<select id="selectMemberIncreaseDaily"
+		parameterType="HashMap" resultType="HashMap">
+		SELECT SUBSTRING(member_created_at, 1, 10) AS `date`,
+			COUNT(member_id) AS `count`
+		FROM `member`
+		WHERE member_created_at
+		<if test="startDate == null and endDate == null">
+			BETWEEN DATE_SUB(NOW(), INTERVAL 7 DAY) AND NOW()
+		</if>
+		<if test="startDate == null and endDate != null">
+			BETWEEN DATE_SUB(CONCAT(#{endDate}, ' 11:59:59'), INTERVAL 7 DAY) AND CONCAT(#{endDate}, ' 11:59:59')
+		</if>
+		<if test="startDate != null and endDate == null">
+			BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND DATE_ADD(CONCAT(#{startDate}, ' 00:00:00'), INTERVAL 7 DAY)
+		</if>
+		<if test="startDate != null and endDate != null">
+			BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND CONCAT(#{endDate}, ' 11:59:59')
+		</if>
+		GROUP BY SUBSTRING(member_created_at, 1, 10);
+	</select>
+	
+	<select id="selectRecordIncreaseDaily"
+		parameterType="HashMap" resultType="HashMap">
+		SELECT SUBSTRING(record_created_at, 1, 10) AS `date`,
+			COUNT(member_id) AS `count`
+		FROM `record`
+		WHERE record_created_at
+		<if test="startDate == null and endDate == null">
+			BETWEEN DATE_SUB(NOW(), INTERVAL 7 DAY) AND NOW()
+		</if>
+		<if test="startDate == null and endDate != null">
+			BETWEEN DATE_SUB(CONCAT(#{endDate}, ' 11:59:59'), INTERVAL 7 DAY) AND CONCAT(#{endDate}, ' 11:59:59')
+		</if>
+		<if test="startDate != null and endDate == null">
+			BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND DATE_ADD(CONCAT(#{startDate}, ' 00:00:00'), INTERVAL 7 DAY)
+		</if>
+		<if test="startDate != null and endDate != null">
+			BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND CONCAT(#{endDate}, ' 11:59:59')
+		</if>
+		GROUP BY SUBSTRING(record_created_at, 1, 10);
+	</select>
+	
+	<select id="selectReplyIncreaseDaily"
+		parameterType="HashMap" resultType="HashMap">
+		SELECT SUBSTRING(reply_date, 1, 10) AS `date`,
+			COUNT(member_id) AS `count`
+		FROM `reply`
+		WHERE reply_date
+		<if test="startDate == null and endDate == null">
+			BETWEEN DATE_SUB(NOW(), INTERVAL 7 DAY) AND NOW()
+		</if>
+		<if test="startDate == null and endDate != null">
+			BETWEEN DATE_SUB(CONCAT(#{endDate}, ' 11:59:59'), INTERVAL 7 DAY) AND CONCAT(#{endDate}, ' 11:59:59')
+		</if>
+		<if test="startDate != null and endDate == null">
+			BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND DATE_ADD(CONCAT(#{startDate}, ' 00:00:00'), INTERVAL 7 DAY)
+		</if>
+		<if test="startDate != null and endDate != null">
+			BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND CONCAT(#{endDate}, ' 11:59:59')
+		</if>
+		GROUP BY SUBSTRING(reply_date, 1, 10);
+	</select>
+</mapper>

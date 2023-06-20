@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Member">
+	<!-- 관리자용 회원 조회 목록 -->
+	<resultMap id="AdminMemberResultSet" type="Member">
+		<id property="memberId" column="member_id" />
+		<result property="memberName" column="member_name" />
+		<result property="memberNickname" column="member_nickname" />
+		<result property="memberBirth" column="member_birth" />
+		<result property="memberEmail" column="member_email" />
+		<result property="memberPhone" column="member_phone" />
+		<result property="memberAuthority" column="member_authority" />
+		<result property="memberSocial" column="member_social" />
+		<result property="memberAllowEmail" column="member_allow_email" />
+	</resultMap>
+
+	<!-- 아이디 회원 조회 --> <!-- 아이디 중복조회 -->
+	<select id="selectById" parameterType="java.lang.String"
+		resultType="Member">
+       <![CDATA[   
+         SELECT member_id, member_pw, member_name, member_nickname, member_email,
+         		member_phone, member_birth, member_created_at, member_activated,
+         		member_authority, member_social, member_allow_email
+         FROM member
+ 		 WHERE member_id = #{memberId}
+     	 ]]>
+	</select>
+	<!-- 회원 가입 -->
+	<insert id="registerMember" parameterType="Member">
+  	 <![CDATA[
+   		INSERT INTO member 
+   		(member_id, member_pw, member_name, member_birth, member_nickname, member_email, member_phone, member_created_at,
+   		member_activated, member_authority, member_social, member_allow_email)
+   		VALUES(#{memberId},#{memberPw},#{memberName},#{memberBirth},#{memberNickname},
+		#{memberEmail},#{memberPhone},default,1,#{memberAuthority},#{memberSocial},#{memberAllowEmail})
+  	    ]]>
+	</insert>
+	<!-- 아이디 찾기 -->
+	<select id="selectByEmail" parameterType="java.lang.String"
+		resultType="Member">
+	 <![CDATA[   
+         SELECT member_id, member_pw, member_name, member_nickname, member_email,
+         		member_phone, member_birth, member_created_at, member_activated,
+         		member_authority, member_social, member_allow_email
+         FROM member
+ 		 WHERE member_email = #{memberEmail}  
+     ]]>
+	</select>
+	<!-- 비밀번호 찾기 -->
+	<select id="selectByPassword" parameterType="Member"
+		resultType="Member">
+	 <![CDATA[   
+         SELECT member_id, member_pw, member_name, member_nickname, member_email,
+         		member_phone, member_birth, member_created_at, member_activated,
+         		member_authority, member_social, member_allow_email
+         FROM member
+ 		 WHERE member_email = #{memberEmail} and member_id = #{memberId}
+     ]]>
+	</select>
+	<!-- 회원 정보 수정 -->
+	<update id="updateMemberInfo" parameterType="Member">
+		UPDATE member
+		SET member_id=#{memberId}, member_nickname= #{memberNickname},
+		member_phone= #{memberPhone}, member_birth=#{memberBirth}
+		<if test="memberPw != null">
+			, member_pw= #{memberPw}
+		</if>
+		WHERE member_email = #{memberEmail}
+	</update>
+	<!-- 전체 회원 리스트 조회 (관리자용) -->
+	<select id="totalMemberList" parameterType="PageOption"
+		resultMap="AdminMemberResultSet">
+	<![CDATA[
+		SELECT member_id, member_name, member_nickname, member_email,
+         		member_phone, member_birth, member_authority, member_social, member_allow_email
+		FROM member
+		ORDER BY member_id DESC
+		LIMIT #{skip}, #{size}
+	]]>
+	</select>
+	<!-- 페이징 처리를 하기 위한 전체 회원 수 -->
+	<select id="selectMemberTotal" parameterType="PageOption"
+		resultType="int">
+		<![CDATA[   
+			SELECT COUNT(*) FROM member
+		]]>
+	</select>
+	<!-- 친구 요청 -->
+	<insert id="requestFriend" parameterType="FriendRequest">
+    <![CDATA[   
+        INSERT INTO friend_request(friend_request_id,from_member_id,to_member_id,friend_request_time) 
+        VALUES(default,#{fromMemberId},#{toMemberId},default);
+    ]]>
+		<selectKey resultType="int" keyProperty="friendRequestId"
+			order="AFTER">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+	</insert>
+
+	<!-- 친구 요청 테이블 조회 -->
+	<select id="selectRequestFriendList"
+		parameterType="FriendRequest" resultType="FriendRequest">
+   <![CDATA[
+   	SELECT * FROM friend_request WHERE from_member_id = #{fromMemberId} and to_member_id = #{toMemberId}
+   ]]>
+	</select>
+	<!-- 친구 수락 -->
+	<insert id="createFriend" parameterType="Friend">
+   	<![CDATA[   
+   	INSERT INTO friend(friend_id,member1_id,member2_id,friend_created_at) 
+	VALUES(default,#{member1Id},#{member2Id},default);
+	]]>
+	</insert>
+	<!-- 친구요청 관계 삭제 -->
+	<delete id="deleteRequestFriend" parameterType="int">
+	 <![CDATA[   
+   		DELETE FROM friend_request WHERE friend_request_id = #{friendRequestId};
+	]]>
+	</delete>
+
+	<!-- 아이디 일부 값으로 회원 조회 -->
+	<select id="selectFindPartOfId" parameterType="java.lang.String"
+		resultType="Member">
+		 <![CDATA[   
+         SELECT member_id, member_pw, member_name, member_nickname, member_email,
+         		member_phone, member_birth, member_created_at, member_activated,
+         		member_authority, member_social, member_allow_email
+         FROM member
+ 		 WHERE member_id LIKE CONCAT ('%',#{memberId},'%') 
+     ]]>
+	</select>
+	<!-- 친구 목록 조회 -->
+	<select id="selectFriendList" parameterType="java.lang.String"
+		resultType="Member">
+	 <![CDATA[   
+       SELECT * FROM member WHERE member_id IN (SELECT member1_id FROM friend WHERE member2_id = #{myMemberId}
+       UNION SELECT member2_id FROM friend WHERE member1_id = #{myMemberId} )
+     ]]>
+	</select>
+
+	<!-- 친구 차단 -->
+	<delete id="deleteRelationship" parameterType="Friend">
+		<![CDATA[ 
+		 DELETE FROM friend where member1_id = #{member1Id} and member2_id =#{member2Id}
+		]]>
+	</delete>
+
+	<select id="selectFriendship" parameterType="RecordSearch"
+		resultType="Integer">
+	 <![CDATA[   
+       SELECT count(*) 
+       FROM friend
+       WHERE member1_id=#{memberId} AND member2_id=#{friendId}
+     ]]>
+	</select>
+
+	<!-- 나의 친구 요청 테이블 조회 -->
+	<select id="selectMyRequestFriendList"
+		parameterType="FriendRequest" resultType="FriendRequest">
+   <![CDATA[
+   	SELECT * FROM friend_request WHERE to_member_id = #{toMemberId} and friend_request_id = #{friendRequestId}
+   ]]>
+	</select>
+
+	<!-- 비밀번호 변경 -->
+	<update id="modifyPw" parameterType="Member">
+	 <![CDATA[
+		UPDATE member
+		SET member_pw= #{memberPw}
+		WHERE member_email= #{memberEmail}
+	]]>
+	</update>
+	
+
+</mapper>

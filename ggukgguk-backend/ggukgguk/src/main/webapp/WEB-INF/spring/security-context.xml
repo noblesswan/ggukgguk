@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+<!-- 	<context:property-placeholder
+		location="classpath:config/auth.properties" /> -->
+    
+    <beans:bean id ="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+    <beans:bean id="userDetailService" class="com.ggukgguk.api.auth.service.SecurityUserDetailService" />
+    <beans:bean id="jwtAuthenticationFilter" class="com.ggukgguk.api.auth.security.JwtAuthenticationFilter"/>
+    <beans:bean id="jwtAuthenticationEntryPoint" class="com.ggukgguk.api.auth.security.JwtAuthenticationEntryPoint">
+    	<beans:constructor-arg
+    		index="0"
+    		value="${auth.allowOrigins}"></beans:constructor-arg>
+    </beans:bean>
+    <beans:bean id="jwtTokenUtil" class="com.ggukgguk.api.auth.util.JwtTokenUtil">
+    	<beans:constructor-arg
+    		index="0"
+    		value="${auth.accessTokenSecret}"></beans:constructor-arg>
+    	<beans:constructor-arg
+    		index="1"
+    		value="${auth.refreshTokenSecret}"></beans:constructor-arg>
+    </beans:bean>
+    
+    <http use-expressions="true" entry-point-ref="jwtAuthenticationEntryPoint" create-session="stateless">
+    	<cors configuration-source-ref="corsConfigurationSource" />
+		<csrf disabled="true" />
+		<intercept-url pattern="/**/*" method="OPTIONS"
+			access="permitAll" />
+		<intercept-url pattern="/resources/images/**"
+			access="permitAll" />
+		<intercept-url pattern="/auth/**" access="permitAll" />
+		<intercept-url pattern="/nlp/**" access="permitAll" />
+		<intercept-url pattern="/record/media/**" method="GET" access="permitAll" />
+		<intercept-url pattern="/admin/notice" method="GET" access="isAuthenticated()" />
+		<intercept-url pattern="/admin/notice/**" method="GET" access="isAuthenticated()" />
+		<intercept-url pattern="/admin/content/claim" access="isAuthenticated()" />
+		<intercept-url pattern="/admin/content/claim/**" access="isAuthenticated()" />
+		<intercept-url pattern="/admin/content/media/**" access="isAuthenticated()" />
+		<intercept-url pattern="/admin/content/media/**" method="PATCH" access="hasAnyAuthority('SYSTEM_ADMIN', 'SERVICE_ADMIN')" />
+		<intercept-url pattern="/admin/content/" access="isAuthenticated()" />
+		<intercept-url pattern="/admin/**" access="hasAnyAuthority('SYSTEM_ADMIN', 'SERVICE_ADMIN')" />
+		<intercept-url pattern="/**" access="isAuthenticated()" />
+		<custom-filter position="FORM_LOGIN_FILTER"
+			ref="jwtAuthenticationFilter" />
+    </http>
+
+    <authentication-manager alias="authenticationManager">
+        <authentication-provider user-service-ref="userDetailService">
+            <password-encoder ref="bcryptPasswordEncoder"/>
+        </authentication-provider>
+    </authentication-manager>
+    
+    <global-method-security  pre-post-annotations="enabled" secured-annotations="enabled"/>
+</beans:beans>

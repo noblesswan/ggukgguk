@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  
+    <Appenders>
+        <File name="File_1" fileName="C:\dev\ggukgguk\main\debug.log"
+            append="true">
+            <PatternLayout pattern="%t %-5p %c{2} - %m%n" />
+        </File>
+        <File name="File_2" fileName="C:\dev\ggukgguk\main\info.log"
+            append="true">
+            <PatternLayout pattern="%d - %m%n" />
+        </File>
+        <Console name="stdout_1" target="SYSTEM_OUT">
+            <PatternLayout pattern="%p == %m == %d%n" />
+        </Console>
+        <Console name="stdout_2" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd:HH:mm} >> %m%n" />
+        </Console>
+    </Appenders>
+  
+    <Loggers>
+  
+        <Logger name="case1" level="warn">
+            <AppenderRef ref="File_1" />
+        </Logger>
+  
+        <Logger name="case2" level="info" additivity="false">
+            <AppenderRef ref="File_2" />
+            <AppenderRef ref="stdout_1" />
+        </Logger>
+  
+        <Logger name="case3" level="debug" additivity="false">
+            <AppenderRef ref="stdout_1" />
+            <AppenderRef ref="File_1" />
+        </Logger>
+        
+        <Logger name="base" level="debug" additivity="false">
+            <AppenderRef ref="stdout_1" />
+            <AppenderRef ref="File_1" />
+        </Logger>
+        
+        <Logger name="com.ggukgguk.api.Admin" level="trace">
+        </Logger>
+        
+        <Logger name="com.ggukgguk.api.Member" level="trace">
+        </Logger>
+        
+        <Logger name="com.ggukgguk.api.Notice" level="trace">
+        </Logger>
+
+        <Logger name="com.ggukgguk.api.Record" level="trace">
+        </Logger>
+
+        <Logger name="com.ggukgguk.api.Diary" level="trace">
+        </Logger>
+        
+  		<Logger name="com.ggukgguk.api.Notification" level="trace">
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="stdout_2" />
+        </Root>
+    </Loggers>
+  
+</Configuration>

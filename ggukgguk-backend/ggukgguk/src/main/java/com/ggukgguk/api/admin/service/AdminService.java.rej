@@ -1,0 +1,9 @@
+diff a/ggukgguk/src/main/java/com/ggukgguk/api/admin/service/AdminService.java b/ggukgguk/src/main/java/com/ggukgguk/api/admin/service/AdminService.java	(rejected hunks)
+@@ -14,6 +14,7 @@
+ 	public void deleteNotice(Notice notice);
+ 	public void updateNotice(Notice notice);
+ 	
++=======
+ 	public boolean addNotice(Notice notice);
+ 	public TotalAndListPayload getNoticeList(NoticeOption option);
+ >>>>>>> db279db005820242a36176ee3c8baa9719af0918

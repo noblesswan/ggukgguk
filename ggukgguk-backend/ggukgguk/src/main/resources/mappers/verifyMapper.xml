@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Verify">
+   
+
+   <insert id="insertAuthenticationCode" parameterType="Verify">
+       <![CDATA[   
+		 INSERT INTO member_verify(verify_created_at, verify_email, verify_code)
+         VALUES(NOW(), #{verifyEmail}, #{verifyCode})
+ 		]]>
+   </insert>
+   
+   <select id="selectAuthenticationCode" parameterType="Verify" resultType="Verify">
+    <![CDATA[  
+    	SELECT * FROM member_verify
+    	WHERE verify_email = #{verifyEmail} and verify_code = #{verifyCode}
+   	]]>
+   </select>
+   
+  
+</mapper>

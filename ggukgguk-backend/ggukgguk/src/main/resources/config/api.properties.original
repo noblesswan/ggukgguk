@@ -1,0 +1,7 @@
+google.secret=
+google.secretPW=
+google.redirectUrl=
+kakao.secret=
+kakao.redirectUrl=
+firebase.secret.path=
+firebase.secret.scope=

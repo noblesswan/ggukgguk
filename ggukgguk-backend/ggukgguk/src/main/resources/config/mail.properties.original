@@ -1,0 +1,7 @@
+mail.mailFrom=
+mail.mailFromName=
+mail.smtpUsername=
+mail.smtpPassword=
+mail.smtpHost=
+mail.smtpPort=
+mail.configSet=

@@ -1,0 +1,43 @@
+{
+  "name": "ggukgguk-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve --port 9090",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@mdi/font": "5.9.55",
+    "@popperjs/core": "^2.11.7",
+    "axios": "^1.3.5",
+    "chart.js": "^4.3.0",
+    "core-js": "^3.8.3",
+    "inline-worker": "^1.1.0",
+    "register-service-worker": "^1.7.2",
+    "roboto-fontface": "*",
+    "v-calendar": "^3.0.3",
+    "vue": "^3.2.13",
+    "vue-audio-visual": "^3.0.4",
+    "vue-chartjs": "^5.2.0",
+    "vue-router": "^4.0.3",
+    "vuetify": "^3.0.0-beta.0",
+    "vuex": "^4.0.0",
+    "vuex-persist": "^3.1.3",
+    "webfontloader": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-pwa": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "vue-cli-plugin-vuetify": "~2.5.8",
+    "webpack-plugin-vuetify": "^2.0.0-alpha.0"
+  }
+}

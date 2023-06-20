@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration 
+          PUBLIC "-//mybatis.org/DTD Config 3.0//EN" 
+          "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+	 <settings>
+	 	<setting name="jdbcTypeForNull" value="NULL"/>
+	 	<setting name="logImpl" value="LOG4J2"/>
+	 	<setting name="mapUnderscoreToCamelCase" value="true"/>
+	 </settings>
+	 
+	 <typeAliases>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.Content" alias="Content"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.Member" alias="MemberAdmin"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.Notice" alias="Notice"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.Main" alias="Main"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.ContentDetail" alias="ContentDetail"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.BatchJobExecution" alias="BatchJobExecution"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.BatchPageOption" alias="BatchPageOption"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.MediaClaimPageOption" alias="MediaClaimPageOption"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.MediaFileRecheckRequest" alias="MediaFileRecheckRequest"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.MediaFile" alias="MediaFileForAdmin"/>
+	 	<typeAlias type="com.ggukgguk.api.admin.vo.MediaFileBlockedHistory" alias="MediaFileBlockedHistory"/>
+	 	<typeAlias type="com.ggukgguk.api.common.vo.PageOption" alias="PageOption"/>
+	 	<typeAlias type="com.ggukgguk.api.record.vo.Record" alias="Record"/>
+	 	<typeAlias type="com.ggukgguk.api.record.vo.MediaFile" alias="MediaFile"/>
+	 	<typeAlias type="com.ggukgguk.api.record.vo.RecordSearch" alias="RecordSearch"/>
+	 	<typeAlias type="com.ggukgguk.api.record.vo.Reply" alias="Reply"/>
+	 	<typeAlias type="com.ggukgguk.api.record.vo.ReplyNickname" alias="ReplyNickname"/>
+	 	<typeAlias type="com.ggukgguk.api.diary.vo.Diary" alias="Diary"/>
+	 	<typeAlias type="com.ggukgguk.api.diary.vo.DiarySearch" alias="DiarySearch"/>
+	 	<typeAlias type="com.ggukgguk.api.diary.vo.DiaryMonth" alias="DiaryMonth"/>
+	 	<typeAlias type="com.ggukgguk.api.diary.vo.DiaryRecord" alias="DiaryRecord"/>
+	 	<typeAlias type="com.ggukgguk.api.diary.vo.DiaryKeyword" alias="DiaryKeyword"/>
+	 	<typeAlias type="com.ggukgguk.api.diary.vo.DiaryColor" alias="DiaryColor"/>
+	 	<typeAlias type="com.ggukgguk.api.member.vo.FriendRequest" alias="FriendRequest"/>
+	 	<typeAlias type="com.ggukgguk.api.member.vo.Friend" alias="Friend"/>
+	 	<typeAlias type="com.ggukgguk.api.member.vo.Member" alias="Member"/>
+	 	<typeAlias type="com.ggukgguk.api.notification.vo.Notification" alias="Notification"/>
+	 	<typeAlias type="com.ggukgguk.api.member.vo.Verify" alias="Verify"/>
+	 	
+	 </typeAliases>
+</configuration>

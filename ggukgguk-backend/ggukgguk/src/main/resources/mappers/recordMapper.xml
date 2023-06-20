@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Record">
+   
+<!-- record와 reply를 매핑하는 resultMap -->
+	<resultMap id="RecordResultSet" type="Record">
+	    <id property="recordId" column="record_id" />
+	    <result property="memberId" column="member_id" />
+	    <result property="memberNickname" column="member1_nickname" />
+	    <result property="friendNickname" column="member2_nickname" />
+	    <result property="recordComment" column="record_comment" />
+	    <result property="recordCreatedAt" column="record_created_at" />
+	    <result property="mediaFileId" column="media_file_id" />
+	    <result property="mediaTypeId" column="media_type_id" />
+	    <result property="recordLocationY" column="record_location_y" />
+	    <result property="recordLocationX" column="record_location_x" />
+	    <result property="recordIsOpen" column="record_is_open" />
+	    <result property="recordShareTo" column="record_share_to" />
+	    <result property="recordShareAccepted" column="record_share_accepted" />
+	    <result property="mainColor" column="main_color" />
+	    <result property="mediaFileBlocked" column="media_file_blocked" />
+	    <collection property="replyList" ofType="ReplyNickname">
+	        <id property="replyId" column="reply_id" />
+	        <result property="replyMemberId" column="reply_member_id" />
+	        <result property="replyContent" column="reply_content" />
+	        <result property="replyDate" column="reply_date" />
+	        <result property="memberNickname" column="member3_nickname" />
+	    </collection>
+	</resultMap>
+
+   <select id="selectList" parameterType="RecordSearch" resultMap="RecordResultSet">  
+			SELECT record.*, reply.reply_id, reply.member_id as reply_member_id, reply.reply_content, reply.reply_date, m1.member_nickname as member1_nickname, 
+			m2.member_nickname as member2_nickname, m3.member_nickname as member3_nickname, 
+			media_file.media_type_id, diary.main_color,
+			(SELECT media_file_blocked
+				FROM media_file
+				WHERE media_file_id=record.media_file_id
+			) AS media_file_blocked
+			FROM record
+			LEFT JOIN media_file ON record.media_file_id = media_file.media_file_id
+			LEFT JOIN member m1 ON record.member_id=m1.member_id AND record.member_id!=#{memberId}
+            LEFT JOIN member m2 ON record.record_share_to = m2.member_id AND record.record_share_to IS NOT NULL
+			LEFT JOIN reply ON record.record_id = reply.record_id
+			LEFT JOIN member m3 ON reply.member_id = m3.member_id
+			LEFT JOIN diary ON record.member_id=diary.member_id AND YEAR(record.record_created_at) = diary.diary_year AND MONTH(record.record_created_at) = diary.diary_month
+ 			<where>
+ 				((record.member_id=#{memberId} and record.record_share_to IS NULL) OR 
+	  			(record.member_id=#{memberId} and record.record_share_to IS NOT NULL AND record.record_share_accepted = 1) OR
+	  			(record.record_share_to=#{memberId} AND record.record_share_accepted=1))
+ 				<if test="startDate != null">
+ 					AND record.record_created_at BETWEEN DATE_SUB(#{startDate}, INTERVAL 4 DAY) AND DATE_ADD(#{startDate}, INTERVAL 1 DAY)
+ 				</if>
+ 				<if test="keyword != null">
+ 					AND record.record_comment LIKE CONCAT('%', #{keyword}, '%')
+ 				</if>
+ 			</where>
+ 			ORDER BY record.record_created_at DESC
+   </select>
+   
+      <select id="selectFriendRecordList" parameterType="RecordSearch" resultMap="RecordResultSet">  
+			SELECT record.*, reply.reply_id, reply.member_id as reply_member_id, reply.reply_content, reply.reply_date, m1.member_nickname as member1_nickname, 
+			m2.member_nickname as member2_nickname, m3.member_nickname as member3_nickname, 
+			media_file.media_type_id, diary.main_color
+			FROM record
+			LEFT JOIN media_file ON record.media_file_id = media_file.media_file_id
+			LEFT JOIN member m1 ON record.member_id=m1.member_id AND record.member_id!=#{friendId}
+            LEFT JOIN member m2 ON record.record_share_to = m2.member_id AND record.record_share_to IS NOT NULL
+			LEFT JOIN reply ON record.record_id = reply.record_id
+			LEFT JOIN member m3 ON reply.member_id = m3.member_id
+			LEFT JOIN diary ON record.member_id=diary.member_id AND YEAR(record.record_created_at) = diary.diary_year AND MONTH(record.record_created_at) = diary.diary_month
+ 			<where>
+ 				((record.member_id=#{friendId} and record.record_is_open=1 and record.record_share_to is null) OR 
+	  			(record.member_id=#{friendId} and record.record_is_open=1 and record.record_share_to IS NOT NULL AND record.record_share_accepted = 1) OR
+      			(record.record_share_to=#{friendId} and record.record_is_open=1 and record.record_share_accepted=1) OR
+	  			(record.member_id=#{memberId} and record.record_share_to=#{friendId} AND record.record_share_accepted=1))
+ 				<if test="startDate != null">
+ 					AND record.record_created_at BETWEEN DATE_SUB(#{startDate}, INTERVAL 4 DAY) AND DATE_ADD(#{startDate}, INTERVAL 1 DAY)
+ 				</if>
+ 				<if test="keyword != null">
+ 					AND record.record_comment LIKE CONCAT('%', #{keyword}, '%')
+ 				</if>
+ 			</where>
+ 			ORDER BY record.record_created_at DESC
+   </select>
+
+	<select id="selectOne" parameterType="Integer" resultMap="RecordResultSet">  
+			SELECT record.*, reply.reply_id, reply.member_id as reply_member_id, reply.reply_content, reply.reply_date, m1.member_nickname as member1_nickname, 
+			m2.member_nickname as member2_nickname, m3.member_nickname as member3_nickname, 
+			media_file.media_type_id
+			FROM record
+			LEFT JOIN media_file ON record.media_file_id = media_file.media_file_id
+			LEFT JOIN member m1 ON record.member_id=m1.member_id AND record.member_id!=#{friendId}
+            LEFT JOIN member m2 ON record.record_share_to = m2.member_id AND record.record_share_to IS NOT NULL
+			LEFT JOIN reply ON record.record_id = reply.record_id
+			LEFT JOIN member m3 ON reply.member_id = m3.member_id
+			WHERE record.record_id=#{recordId}
+   </select>
+   
+  	<select id="selectMedia" parameterType="String" resultType="MediaFile">  
+			SELECT media_file_id, media_type_id, media_file_blocked, media_file_checked
+			FROM media_file
+			WHERE media_file_id = #{mediaFileId};
+   </select>
+
+
+   <update id="update" parameterType="Record">  
+	  <![CDATA[   
+         UPDATE record
+         SET record_comment=#{recordComment}
+         WHERE record_id=#{recordId}
+      ]]>
+   </update>
+
+   <delete id="deleteMediaFile" parameterType="String">
+      <![CDATA[   
+        DELETE FROM media_file
+        WHERE media_file_id=#{mediaFileId}
+     ]]>
+   </delete>
+   
+   <delete id="delete" parameterType="Integer">
+       <![CDATA[   
+         DELETE FROM record
+         WHERE record_id=#{recordId}
+      ]]>
+   </delete>
+   
+   <insert id="insertMedia" parameterType="MediaFile">
+       <![CDATA[   
+         INSERT INTO media_file
+         (media_file_id, media_type_id, media_file_blocked, media_file_checked)
+         VALUES (#{mediaFileId}, #{mediaTypeId}, #{mediaFileBlocked}, #{mediaFileChecked})
+      ]]>
+   </insert>
+   
+    <insert id="insertRecord" parameterType="Record">
+       <![CDATA[   
+         INSERT INTO record
+         (record_id, member_id, record_comment, record_created_at,
+         	media_file_id, record_location_y, record_location_x,
+         	record_is_open, record_share_to, record_share_accepted)
+         VALUES (null, #{memberId}, #{recordComment}, default,
+         	#{mediaFileId}, #{recordLocationY}, #{recordLocationX},
+         	#{recordIsOpen}, #{recordShareTo}, #{recordShareAccepted})
+      ]]>
+	<selectKey resultType="int" keyProperty="recordId" order="AFTER">
+		SELECT LAST_INSERT_ID()
+	</selectKey>
+   </insert>
+
+   <select id="selectUnaccepted" parameterType="String" resultMap="RecordResultSet">  
+		SELECT record.*, member.member_nickname as member1_nickname, media_file.media_type_id
+		FROM record
+		LEFT JOIN member ON record.member_id = member.member_id
+		LEFT JOIN media_file ON record.media_file_id = media_file.media_file_id
+		WHERE record.record_share_to=#{memberId} AND record.record_share_accepted=0
+		ORDER BY record.record_created_at DESC
+   </select>
+   
+   <update id="updateUnaccepted" parameterType="Integer">  
+	  <![CDATA[   
+         UPDATE record
+         SET record_share_accepted=1
+         WHERE record_id=#{recordId}
+      ]]>
+   </update>
+   
+   <!-- 조각 기준 친구 목록 조회 -->
+	<select id="selectFriendListByRecord" parameterType="java.lang.String"
+		resultType="Member">
+	 <![CDATA[   
+        SELECT m.* 
+		FROM friend f
+		JOIN member m ON f.member2_id = m.member_id
+		JOIN (
+		    SELECT r.member_id, MAX(r.record_created_at) AS latest_date
+		    FROM record r
+		    GROUP BY r.member_id
+		) sub ON f.member2_id = sub.member_id
+		WHERE f.member1_id = #{myMemberId}
+		ORDER BY sub.latest_date DESC;
+     ]]>
+	</select>
+  
+</mapper>

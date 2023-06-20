@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ggukgguk.api.Notification">
+
+	<!-- 회원별 알림 조회 -->
+	<select id="selectNotificationList"
+		parameterType="java.lang.String" resultType="Notification">
+		 <![CDATA[   
+         SELECT notification_id, receiver_id, notification_type_id, 
+         notification_created_at, reference_id,notification_is_read, 
+         notification_message
+         FROM notification
+ 		 WHERE receiver_id = #{receiverId}
+ 		 ORDER By notification_created_at desc;
+     	 ]]>
+	</select>
+	
+	<!-- 특정 알림 조회 -->
+	<select id="selectNotification" parameterType="int"
+		resultType="Notification">
+		 <![CDATA[   
+       		SELECT notification_id, receiver_id, notification_type_id, 
+		       notification_created_at, reference_id,notification_is_read, 
+		       notification_message
+		    FROM notification
+		 	WHERE notification_id = #{notificationId}
+		 	ORDER By notification_created_at desc;
+	  	 ]]>
+	</select>
+	
+	<!-- 읽지 않은 알림 개수 -->
+	<select id="selectUnreadNotiCount"
+		parameterType="java.lang.String" resultType="int">
+	 <![CDATA[   
+        SELECT COUNT(*)
+        FROM notification
+		WHERE receiver_id = #{receiverId} and notification_is_read = false
+   	 ]]>
+	</select>
+
+	<!-- 알림 생성 -->
+	<insert id="createNotification" parameterType="Notification"> 
+	<![CDATA[ 
+		INSERT INTO notification (receiver_id, notification_type_id, reference_id, 
+		notification_message) VALUES (#{receiverId}, #{notificationTypeId}, #{referenceId}, 
+		#{notificationMessage}); 
+	]]>
+	</insert>
+
+	<!-- 알림 삭제 -->
+	<delete id="deleteNotification" parameterType="Notification">
+		<![CDATA[ 
+		DELETE FROM notification WHERE notification_id = #{notificationId}
+		]]>
+	</delete>
+	<!-- 알림 읽음 -->
+	<update id="updateNotificationIsReadColumn" parameterType="Notification">
+		<![CDATA[ 
+			UPDATE notification
+			SET notification_is_read = #{notificationIsRead}
+			WHERE notification_id = #{notificationId}
+		]]>
+	</update>
+</mapper>
