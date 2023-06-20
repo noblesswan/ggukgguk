@@ -9,7 +9,7 @@
 - 가볍게 일상을 적으며 친구들과 공유할 수 있는 꾹꾹을 개발
 
 ## 기술 스택
-<img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=spring&logoColor=white"/> <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat&logo=vue.js&logoColor=white"/> <img src="https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=vue.js&logoColor=white"/><img src="https://img.shields.io/badge/mysql-4479A1?style=flat&logo=vue.js&logoColor=white"/>
+<img src="https://img.shields.io/badge/Spring-6DB33F?style=flat&logo=spring&logoColor=white"/> <img src="https://img.shields.io/badge/Vue.js-4FC08D?style=flat&logo=vue.js&logoColor=white"/> <img src="https://img.shields.io/badge/Jenkins-D24939?style=flat&logo=vue.js&logoColor=white"/> <img src="https://img.shields.io/badge/mysql-4479A1?style=flat&logo=vue.js&logoColor=white"/>
 
 ## 구현 기능
 - 소셜 로그인 및 회원가입
